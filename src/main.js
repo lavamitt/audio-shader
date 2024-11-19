@@ -12,8 +12,13 @@ const uniforms = {
   u_mid: { value: 0 },
   u_high: { value: 0 },
   u_presence: { value: 0 },
+  u_spectralCentroid: { value: 0 },
+  u_spectralFlatness: { value: 0 }
 };
 
+
+let centroid_buffer = [];
+let flatness_buffer = [];
 
 const scene = new THREE.Scene();
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -108,28 +113,41 @@ async function startAudio() {
         "spectralSpread",
       ],
       callback: (features) => {
-        console.log(features);
+        // uniforms["u_spectralCentroid"] = { value: features["spectralCentroid"] };
+        // uniforms["u_spectralFlatness"] = { value: features["spectralFlatness"] };
+
+
+        
+        if (centroid_buffer.length >= 30) {
+            centroid_buffer.shift();
+        }
+        centroid_buffer.push(features["spectralCentroid"]);
+
+        if (flatness_buffer.length >= 30) {
+            flatness_buffer.shift();
+        } 
+        flatness_buffer.push(features["spectralFlatness"]);
+
+
+        const average_centroid = centroid_buffer.reduce((a, b) => a + b) / centroid_buffer.length;
+        const average_flatness = flatness_buffer.reduce((a, b) => a + b) / flatness_buffer.length;
+
+        uniforms["u_spectralCentroid"] = { value: average_centroid };
+        uniforms["u_spectralFlatness"] = { value: average_flatness };
       },
     });
     meydaAnalyzer.start();
 
     animate();
-
-    // audioFeatureExtractor(audioContext, source);
   } catch (err) {
     console.error('Error accessing microphone:', err);
   }
 }
 
-// Add button listener
+
 document.getElementById('startAudio').addEventListener('click', startAudio);
 
-// Add sensitivity control
+// unused
 document.getElementById('sensitivity').addEventListener('input', (e) => {
   const sensitivity = e.target.value / 100;
-  // You can use this to adjust how the visualization responds
 });
-
-// window.addEventListener('resize', () => {
-//     material.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
-//   });
