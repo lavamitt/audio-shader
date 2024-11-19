@@ -4,6 +4,7 @@ import { vertexShader, fragmentShader } from './shaders.js';
 let analyser, dataArray;
 const uniforms = {
   u_time: { value: 0 },
+  u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
   u_volume: { value: 0 },
   u_subBass: { value: 0 },
   u_bass: { value: 0 },
@@ -101,3 +102,7 @@ document.getElementById('sensitivity').addEventListener('input', (e) => {
   const sensitivity = e.target.value / 100;
   // You can use this to adjust how the visualization responds
 });
+
+// window.addEventListener('resize', () => {
+//     material.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
+//   });
